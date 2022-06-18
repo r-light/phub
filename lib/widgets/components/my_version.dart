@@ -97,6 +97,7 @@ class _MyProjectInfoState extends State<MyProjectInfo> {
                 ]),
           ),
           ListTile(
+            title: const Text("更新内容"),
             subtitle: Text(_latestVersionInfo.value),
           ),
         ],

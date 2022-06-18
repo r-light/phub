@@ -62,7 +62,9 @@ class Global {
 
   static void openUrl(String url) async {
     var uri = Uri.parse(url);
-    if (!await launchUrl(uri)) throw 'Could not launch $uri';
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $uri';
+    }
   }
 }
 
