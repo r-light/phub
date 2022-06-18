@@ -10,6 +10,7 @@ class MyAboutMe extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: const Text("关于"),
+          centerTitle: false,
         ),
         body: SafeArea(
             child: Column(
@@ -22,9 +23,9 @@ class MyAboutMe extends StatelessWidget {
             ),
             const Divider(),
             // version
-            const ListTile(
-              title: MyVersionInfo(),
-            ),
+            const MyVersionInfo(),
+            const Divider(),
+            const MyProjectInfo(),
             const Divider(),
           ],
         )));

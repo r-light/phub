@@ -8,6 +8,7 @@ import 'package:html/parser.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:phub/common/dto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum Porny91Options { latest, hottest, author }
 
@@ -18,6 +19,10 @@ class Global {
   static late final String appPath;
   static late final String cachePath;
   static const appTitle = "Phub";
+  static const versionUrl =
+      "https://api.github.com/repos/r-light/phub/releases/latest";
+  static const releaseUrl = "https://github.com/r-light/phub/releases/";
+
   static const Map<int, Color> pinkMap = {
     50: Color(0xFFFCE4EC),
     100: Color(0xFFF8BBD0),
@@ -53,6 +58,11 @@ class Global {
             content: Text(text),
             duration: duration,
           ));
+  }
+
+  static void openUrl(String url) async {
+    var uri = Uri.parse(url);
+    if (!await launchUrl(uri)) throw 'Could not launch $uri';
   }
 }
 
