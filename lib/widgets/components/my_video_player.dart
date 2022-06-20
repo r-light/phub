@@ -1,4 +1,4 @@
-import 'package:chewie/chewie.dart';
+import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phub/common/dto.dart';
@@ -7,7 +7,6 @@ import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_status.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 class MyVideoPlayer extends StatefulWidget {
   final dynamic content;
@@ -21,10 +20,28 @@ class MyVideoPlayer extends StatefulWidget {
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
   late Future<String> videoUrl;
   late Future<List<VideoSimple>> videos;
+  late Future<bool> supported = _controller!.isPictureInPictureSupported();
   bool focus = false;
-  VideoPlayerController? videoPlayerController;
-  ChewieController? chewieController;
-  Chewie? playerWidget;
+  final GlobalKey _betterPlayerKey = GlobalKey();
+  var betterPlayerConfiguration = BetterPlayerConfiguration(
+      autoPlay: false,
+      looping: false,
+      fullScreenByDefault: false,
+      allowedScreenSleep: false,
+      deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+      controlsConfiguration: const BetterPlayerControlsConfiguration(
+          enableSubtitles: false,
+          enableQualities: false,
+          enableAudioTracks: true,
+          enablePip: true,
+          controlBarColor: Colors.transparent),
+      translations: [
+        BetterPlayerTranslations(
+          languageCode: "zh",
+          overflowMenuPlaybackSpeed: "倍速",
+        )
+      ]);
+  BetterPlayerController? _controller;
 
   @override
   void initState() {
@@ -35,8 +52,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
 
   @override
   void dispose() {
-    videoPlayerController?.dispose();
-    chewieController?.dispose();
+    _controller?.clearCache();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -112,7 +129,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               ],
             ),
             onTap: () {
-              chewieController?.pause();
+              _controller?.pause();
               Navigator.of(context)
                   .pushNamed(MySources.searchResult, arguments: {
                 "keywords": widget.content["record"].author,
@@ -145,42 +162,40 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
             return const MyWaiting();
           }
           var m3u8 = snapshot.requireData;
-          if (videoPlayerController == null) {
-            videoPlayerController = VideoPlayerController.network(m3u8);
-            videoPlayerController!.initialize().whenComplete(() {
-              setState(() {
-                chewieController = ChewieController(
-                    videoPlayerController: videoPlayerController!,
-                    autoInitialize: true,
-                    allowedScreenSleep: false,
-                    optionsTranslation: OptionsTranslation(
-                      playbackSpeedButtonText: '倍速',
-                      subtitlesButtonText: '字幕',
-                      cancelButtonText: '取消',
-                    ),
-                    deviceOrientationsAfterFullScreen: [
-                      DeviceOrientation.portraitUp
-                    ],
-                    errorBuilder: (context, meg) {
-                      return const Center(
-                        child: Text("失败了呜呜呜...\n可能需要会员"),
-                      );
-                    });
-                playerWidget = Chewie(
-                  controller: chewieController!,
+          _controller ??= BetterPlayerController(
+            betterPlayerConfiguration,
+            betterPlayerDataSource: BetterPlayerDataSource(
+              BetterPlayerDataSourceType.network,
+              m3u8,
+              cacheConfiguration: const BetterPlayerCacheConfiguration(
+                useCache: true,
+                preCacheSize: 10 * 1024 * 1024,
+                maxCacheSize: 10 * 1024 * 1024,
+                maxCacheFileSize: 10 * 1024 * 1024,
+                key: "MyBetterPlayerCacheKey",
+              ),
+            ),
+          );
+          return FutureBuilder<bool>(
+              future: supported,
+              builder: ((context, snapshot) {
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return const MyWaiting();
+                }
+                var supported = snapshot.requireData;
+                if (supported) {
+                  _controller!.enablePictureInPicture(_betterPlayerKey);
+                }
+
+                return GestureDetector(
+                  child: BetterPlayer(
+                    controller: _controller!,
+                    key: _betterPlayerKey,
+                  ),
+                  onLongPress: () => _controller!.setSpeed(1.5),
+                  onLongPressUp: () => _controller!.setSpeed(1.0),
                 );
-              });
-            });
-          }
-          return playerWidget != null
-              ? GestureDetector(
-                  child: playerWidget,
-                  onLongPress: () =>
-                      videoPlayerController?.setPlaybackSpeed(1.5),
-                  onLongPressUp: () =>
-                      videoPlayerController?.setPlaybackSpeed(1.0),
-                )
-              : const MyWaiting();
+              }));
         }));
   }
 
@@ -214,7 +229,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 relatedFunc: widget.content["relatedFunc"],
                 authorFunc: widget.content["authorFunc"],
                 searchFunc: widget.content["searchFunc"],
-                controller: chewieController,
+                controller: _controller,
                 child: VideoSimpleItem(
                   thumb: record.thumb,
                   title: record.title,

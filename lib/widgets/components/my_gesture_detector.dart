@@ -1,4 +1,3 @@
-import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
@@ -22,7 +21,7 @@ class MyGridGestureDetector extends StatelessWidget {
   final dynamic videoFunc;
   final dynamic authorFunc;
   final dynamic searchFunc;
-  final ChewieController? controller;
+  final dynamic controller;
 
   @override
   Widget build(BuildContext context) {
