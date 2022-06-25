@@ -23,24 +23,19 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   late Future<bool> supported = _controller!.isPictureInPictureSupported();
   bool focus = false;
   final GlobalKey _betterPlayerKey = GlobalKey();
-  var betterPlayerConfiguration = BetterPlayerConfiguration(
-      autoPlay: false,
-      looping: false,
-      fullScreenByDefault: false,
-      allowedScreenSleep: false,
-      deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
-      controlsConfiguration: const BetterPlayerControlsConfiguration(
-          enableSubtitles: false,
-          enableQualities: false,
-          enableAudioTracks: true,
-          enablePip: true,
-          controlBarColor: Colors.transparent),
-      translations: [
-        BetterPlayerTranslations(
-          languageCode: "zh",
-          overflowMenuPlaybackSpeed: "倍速",
-        )
-      ]);
+  var betterPlayerConfiguration = const BetterPlayerConfiguration(
+    autoPlay: false,
+    looping: false,
+    fullScreenByDefault: false,
+    allowedScreenSleep: false,
+    deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
+    controlsConfiguration: BetterPlayerControlsConfiguration(
+        enableSubtitles: false,
+        enableQualities: false,
+        enableAudioTracks: false,
+        enablePip: true,
+        controlBarColor: Colors.transparent),
+  );
   BetterPlayerController? _controller;
 
   @override

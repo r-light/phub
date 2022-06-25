@@ -185,6 +185,19 @@ class VideoLocal with ChangeNotifier {
     var pref = await SharedPreferences.getInstance();
     pref.setString("savedFavorite", jsonEncode(favorite));
   }
+
+  void insertFavoriteIndex(int index1, int index2) async {
+    if (index1 == index2) return;
+    List<MapEntry<String, VideoSimple>> entries = favorite.entries.toList();
+    var removed = entries.removeAt(index1);
+    entries.insert(index2, removed);
+
+    favorite.clear();
+    favorite.addEntries(entries);
+    notifyListeners();
+    var pref = await SharedPreferences.getInstance();
+    pref.setString("savedFavorite", jsonEncode(favorite));
+  }
 }
 
 class MyDio {

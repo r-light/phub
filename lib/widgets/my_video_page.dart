@@ -6,6 +6,7 @@ import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:phub/widgets/my_porny91.dart';
 import 'package:provider/provider.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 class MyVideoPage extends StatelessWidget {
   const MyVideoPage({Key? key}) : super(key: key);
@@ -99,7 +100,11 @@ class MyVideoLayoutState extends State<MyVideoLayout>
   }
 
   Widget getGridView(List<VideoSimple> records) {
-    return GridView.builder(
+    return ReorderableGridView.builder(
+      onReorder: (oldIndex, newIndex) {
+        Provider.of<VideoLocal>(context, listen: false)
+            .insertFavoriteIndex(oldIndex, newIndex);
+      },
       padding: const EdgeInsets.all(5.0),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -111,6 +116,7 @@ class MyVideoLayoutState extends State<MyVideoLayout>
       itemBuilder: (context, index) {
         VideoSimple record = records[index];
         return MyGridGestureDetector(
+          key: ValueKey(Global.videoSimpleKey(record)),
           record: record,
           videoFunc: PornyClient().parseVideo,
           relatedFunc: PornyClient().parseRelated,

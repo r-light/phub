@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: Global.appTitle,
       initialRoute: "/",
-      locale: const Locale('zh', 'CN'),
+      locale: const Locale('zh'),
       onGenerateRoute: (RouteSettings settings) {
         var routes = <String, WidgetBuilder>{
           MySources.videoPlayer: (ctx) =>
