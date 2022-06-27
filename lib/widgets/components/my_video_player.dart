@@ -18,9 +18,10 @@ class MyVideoPlayer extends StatefulWidget {
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-  late Future<String> videoUrl;
+  late Future videoUrl;
   late Future<List<VideoSimple>> videos;
-  late Future<bool> supported = _controller!.isPictureInPictureSupported();
+  late BetterPlayerController _controller;
+  late Future<bool> supported = _controller.isPictureInPictureSupported();
   bool focus = false;
   final GlobalKey _betterPlayerKey = GlobalKey();
   var betterPlayerConfiguration = const BetterPlayerConfiguration(
@@ -36,19 +37,36 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         enablePip: true,
         controlBarColor: Colors.transparent),
   );
-  BetterPlayerController? _controller;
 
   @override
   void initState() {
     super.initState();
-    videoUrl = widget.content["videoFunc"](widget.content["record"].videoUrl);
+    _controller = BetterPlayerController(
+      betterPlayerConfiguration,
+    );
+    videoUrl = widget.content["videoFunc"](widget.content["record"].videoUrl)
+        .then((m3u8) {
+      _controller.setupDataSource(
+        BetterPlayerDataSource(
+          BetterPlayerDataSourceType.network,
+          m3u8,
+          cacheConfiguration: const BetterPlayerCacheConfiguration(
+            useCache: true,
+            preCacheSize: 10 * 1024 * 1024,
+            maxCacheSize: 10 * 1024 * 1024,
+            maxCacheFileSize: 10 * 1024 * 1024,
+            key: "MyBetterPlayerCacheKey",
+          ),
+        ),
+      );
+      return m3u8;
+    });
     videos = widget.content["relatedFunc"](widget.content["record"].videoUrl);
   }
 
   @override
   void dispose() {
-    _controller?.clearCache();
-    _controller?.dispose();
+    _controller.clearCache();
     super.dispose();
   }
 
@@ -124,7 +142,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               ],
             ),
             onTap: () {
-              _controller?.pause();
+              _controller.pause();
               Navigator.of(context)
                   .pushNamed(MySources.searchResult, arguments: {
                 "keywords": widget.content["record"].author,
@@ -145,7 +163,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   }
 
   Widget getVideoWidget() {
-    return FutureBuilder<String>(
+    return FutureBuilder(
         future: videoUrl,
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
@@ -156,21 +174,6 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
           if (!snapshot.hasData) {
             return const MyWaiting();
           }
-          var m3u8 = snapshot.requireData;
-          _controller ??= BetterPlayerController(
-            betterPlayerConfiguration,
-            betterPlayerDataSource: BetterPlayerDataSource(
-              BetterPlayerDataSourceType.network,
-              m3u8,
-              cacheConfiguration: const BetterPlayerCacheConfiguration(
-                useCache: true,
-                preCacheSize: 10 * 1024 * 1024,
-                maxCacheSize: 10 * 1024 * 1024,
-                maxCacheFileSize: 10 * 1024 * 1024,
-                key: "MyBetterPlayerCacheKey",
-              ),
-            ),
-          );
           return FutureBuilder<bool>(
               future: supported,
               builder: ((context, snapshot) {
@@ -179,16 +182,11 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 }
                 var supported = snapshot.requireData;
                 if (supported) {
-                  _controller!.enablePictureInPicture(_betterPlayerKey);
+                  _controller.enablePictureInPicture(_betterPlayerKey);
                 }
-
-                return GestureDetector(
-                  child: BetterPlayer(
-                    controller: _controller!,
-                    key: _betterPlayerKey,
-                  ),
-                  onLongPress: () => _controller!.setSpeed(1.5),
-                  onLongPressUp: () => _controller!.setSpeed(1.0),
+                return BetterPlayer(
+                  controller: _controller,
+                  key: _betterPlayerKey,
                 );
               }));
         }));
