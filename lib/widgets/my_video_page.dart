@@ -102,6 +102,8 @@ class MyVideoLayoutState extends State<MyVideoLayout>
   Widget getGridView(List<VideoSimple> records) {
     return ReorderableGridView.builder(
       onReorder: (oldIndex, newIndex) {
+        oldIndex = records.length - 1 - oldIndex;
+        newIndex = records.length - 1 - newIndex;
         Provider.of<VideoLocal>(context, listen: false)
             .insertFavoriteIndex(oldIndex, newIndex);
       },
