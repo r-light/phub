@@ -27,7 +27,7 @@ class MyVideoPage extends StatelessWidget {
           leading: Builder(
             builder: (context) {
               return IconButton(
-                icon: const Icon(Icons.list, color: Colors.white),
+                icon: const Icon(Icons.list),
                 onPressed: () {
                   Scaffold.of(context).openDrawer();
                 },
