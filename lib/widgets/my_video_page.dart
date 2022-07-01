@@ -76,21 +76,25 @@ class MyVideoLayoutState extends State<MyVideoLayout>
     switch (widget.tabIndex) {
       case 0:
         {
-          return getGridView(Provider.of<VideoLocal>(context, listen: true)
-              .history
-              .values
-              .toList(growable: false)
-              .reversed
-              .toList(growable: false));
+          return getGridView(
+              Provider.of<VideoLocal>(context, listen: true)
+                  .history
+                  .values
+                  .toList(growable: false)
+                  .reversed
+                  .toList(growable: false),
+              0);
         }
       case 1:
         {
-          return getGridView(Provider.of<VideoLocal>(context, listen: true)
-              .favorite
-              .values
-              .toList(growable: false)
-              .reversed
-              .toList(growable: false));
+          return getGridView(
+              Provider.of<VideoLocal>(context, listen: true)
+                  .favorite
+                  .values
+                  .toList(growable: false)
+                  .reversed
+                  .toList(growable: false),
+              1);
         }
       default:
         {
@@ -99,43 +103,73 @@ class MyVideoLayoutState extends State<MyVideoLayout>
     }
   }
 
-  Widget getGridView(List<VideoSimple> records) {
-    return ReorderableGridView.builder(
-      onReorder: (oldIndex, newIndex) {
-        oldIndex = records.length - 1 - oldIndex;
-        newIndex = records.length - 1 - newIndex;
-        Provider.of<VideoLocal>(context, listen: false)
-            .insertFavoriteIndex(oldIndex, newIndex);
-      },
-      padding: const EdgeInsets.all(5.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.0,
-        crossAxisSpacing: 5.0,
-        mainAxisSpacing: 5.0,
-      ),
-      itemCount: records.length,
-      itemBuilder: (context, index) {
-        VideoSimple record = records[index];
-        return MyGridGestureDetector(
-          key: ValueKey(Global.videoSimpleKey(record)),
-          record: record,
-          videoFunc: PornyClient().parseVideo,
-          relatedFunc: PornyClient().parseRelated,
-          authorFunc: PornyClient().parseFromAuthor,
-          searchFunc: PornyClient().parseFromSearch,
-          child: VideoSimpleItem(
-            thumb: record.thumb,
-            title: record.title,
-            author: record.author,
-            updateTime: record.updateDate,
-            source: record.sourceName ?? "unknown",
-            isList: false,
-            pageView: record.pageView,
-          ),
-        );
-      },
-    );
+  Widget getGridView(List<VideoSimple> records, int idx) {
+    return idx == 0
+        ? GridView.builder(
+            padding: const EdgeInsets.all(5.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 5.0,
+              mainAxisSpacing: 5.0,
+            ),
+            itemCount: records.length,
+            itemBuilder: (context, index) {
+              VideoSimple record = records[index];
+              return MyGridGestureDetector(
+                record: record,
+                videoFunc: PornyClient().parseVideo,
+                relatedFunc: PornyClient().parseRelated,
+                authorFunc: PornyClient().parseFromAuthor,
+                searchFunc: PornyClient().parseFromSearch,
+                child: VideoSimpleItem(
+                  thumb: record.thumb,
+                  title: record.title,
+                  author: record.author,
+                  updateTime: record.updateDate,
+                  source: record.sourceName ?? "unknown",
+                  isList: false,
+                  pageView: record.pageView,
+                ),
+              );
+            },
+          )
+        : ReorderableGridView.builder(
+            onReorder: (oldIndex, newIndex) {
+              oldIndex = records.length - 1 - oldIndex;
+              newIndex = records.length - 1 - newIndex;
+              Provider.of<VideoLocal>(context, listen: false)
+                  .insertFavoriteIndex(oldIndex, newIndex);
+            },
+            padding: const EdgeInsets.all(5.0),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 5.0,
+              mainAxisSpacing: 5.0,
+            ),
+            itemCount: records.length,
+            itemBuilder: (context, index) {
+              VideoSimple record = records[index];
+              return MyGridGestureDetector(
+                key: ValueKey(Global.videoSimpleKey(record)),
+                record: record,
+                videoFunc: PornyClient().parseVideo,
+                relatedFunc: PornyClient().parseRelated,
+                authorFunc: PornyClient().parseFromAuthor,
+                searchFunc: PornyClient().parseFromSearch,
+                child: VideoSimpleItem(
+                  thumb: record.thumb,
+                  title: record.title,
+                  author: record.author,
+                  updateTime: record.updateDate,
+                  source: record.sourceName ?? "unknown",
+                  isList: false,
+                  pageView: record.pageView,
+                ),
+              );
+            },
+          );
   }
 
   @override
