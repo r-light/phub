@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
+import 'package:phub/widgets/components/my_setting_action.dart';
 import 'package:phub/widgets/components/my_status.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +57,8 @@ class _MySearchResultState extends State<MySearchResult> {
                 : IconButton(
                     onPressed: () => changeView(context),
                     icon: const Icon(Icons.list),
-                  )
+                  ),
+            ...alwaysInActions(),
           ],
         ),
         body: Column(children: [

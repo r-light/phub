@@ -87,7 +87,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                   )
                 : const Icon(
                     Icons.favorite_border,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
             onPressed: () {
               Provider.of<VideoLocal>(context, listen: false)

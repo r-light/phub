@@ -5,6 +5,7 @@ import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_keep_alive.dart';
+import 'package:phub/widgets/components/my_setting_action.dart';
 import 'package:phub/widgets/components/my_status.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:phub/widgets/components/my_video_interface.dart';
@@ -114,10 +115,20 @@ class PornyClient implements MyVideo {
       var thumb =
           element.querySelector(".video-elem>a>.img")?.attributes["style"] ??
               "";
-      final RegExp reg = RegExp(r"http.*?'");
-      final match = reg.firstMatch(thumb);
+      RegExp reg = RegExp(r"http.*?'");
+      var match = reg.firstMatch(thumb);
       if (match != null) {
         thumb = match[0]!.substring(0, match[0]!.length - 1);
+      } else {
+        RegExp reg = RegExp(r"url\('([\s\S]*)'\)");
+        match = reg.firstMatch(thumb);
+        if (match != null) {
+          var tmp = match.group(1)!;
+          if (!tmp.startsWith("http")) {
+            tmp = "https:$tmp";
+          }
+          thumb = tmp;
+        }
       }
       var author = element
               .querySelector(".video-elem>small")
@@ -287,7 +298,8 @@ class _MyPorny91State extends State<MyPorny91> {
                 : IconButton(
                     onPressed: () => changeView(context),
                     icon: const Icon(Icons.list),
-                  )
+                  ),
+            ...alwaysInActions(),
           ],
           bottom: TabBar(
             isScrollable: true,

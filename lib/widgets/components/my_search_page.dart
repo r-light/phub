@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phub/common/global.dart';
+import 'package:phub/widgets/components/my_setting_action.dart';
 
 class MyVideoSearchPage extends StatefulWidget {
   const MyVideoSearchPage({Key? key, required this.content}) : super(key: key);
@@ -39,9 +40,13 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          elevation: 0.0,
-          title: Text(widget.content["sourceName"], textAlign: TextAlign.left),
-          centerTitle: false),
+        elevation: 0.0,
+        title: Text(widget.content["sourceName"], textAlign: TextAlign.left),
+        centerTitle: false,
+        actions: [
+          ...alwaysInActions(),
+        ],
+      ),
       body: Column(
         children: [
           Container(
@@ -52,6 +57,7 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
             decoration: dec,
             padding: EdgeInsets.all(padding),
             child: TextField(
+              cursorColor: Colors.black,
               // scrollPadding: EdgeInsets.all(padding),
               textAlignVertical: TextAlignVertical.bottom,
               toolbarOptions: const ToolbarOptions(
