@@ -3,6 +3,7 @@ import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
 import 'package:phub/widgets/components/my_drawer.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
+import 'package:phub/widgets/components/my_version.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:phub/widgets/my_porny91.dart';
 import 'package:provider/provider.dart';
@@ -69,6 +70,20 @@ class MyVideoLayoutState extends State<MyVideoLayout>
   // final int crossAxisCount = 3;
   // final double titleFontSize = 12;
   // final double sourceFontSize = 12;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.tabIndex == 1) {
+      checkUpdate().then((shouldUpdate) {
+        if (shouldUpdate) {
+          Global.showSnackBar("检测到新版本");
+        } else {
+          Global.showSnackBar("当前版本已是最新");
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

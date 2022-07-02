@@ -321,11 +321,9 @@ class _MyPorny91State extends State<MyPorny91> {
     super.initState();
     PornyClient().parseFromDomainSite().then((value) {
       value
-          ? Global.showSnackBar(
-              context,
-              "当前域名为: ${PornyClient().currentDomain}",
+          ? Global.showSnackBar("当前域名为: ${PornyClient().currentDomain}",
               const Duration(seconds: 1))
-          : Global.showSnackBar(context, "网络有可能存在问题");
+          : Global.showSnackBar("网络有可能存在问题");
       tabsUrlFuture = PornyClient().parseFromCurrentDomain();
       setState(() {});
     });

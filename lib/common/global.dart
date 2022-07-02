@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:html/parser.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:phub/common/dto.dart';
@@ -47,24 +48,20 @@ class Global {
     return item.id + (item.source ?? "unknown");
   }
 
-  static void showSnackBar(BuildContext context, String text,
-      [Duration? duration]) {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-    duration == null
-        ? ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(text),
-          ))
-        : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(text),
-            duration: duration,
-          ));
-  }
-
   static void openUrl(String url) async {
     var uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $uri';
     }
+  }
+
+  static void showSnackBar(String text, [Duration? duration]) {
+    EasyLoading.dismiss();
+    duration == null
+        ? EasyLoading.showToast(text,
+            toastPosition: EasyLoadingToastPosition.bottom)
+        : EasyLoading.showToast(text,
+            toastPosition: EasyLoadingToastPosition.bottom, duration: duration);
   }
 }
 
@@ -288,4 +285,11 @@ class Configs with ChangeNotifier {
   }
 
   double get listViewItemHeight => _listViewItemHeight;
+
+  set listViewItemHeight(double value) {
+    _listViewItemHeight = value;
+    notifyListeners();
+    SharedPreferences.getInstance().then((pref) =>
+        pref.setDouble("listViewItemHeight", _listViewItemHeight));
+  }
 }

@@ -10,6 +10,23 @@ Future initVersion() async {
   _version = packageInfo.version;
 }
 
+Future<bool> checkUpdate() async {
+  var resp = await MyDio().dio.get(Global.versionUrl);
+  if (resp.statusCode != 200) return false;
+  _latestVersionInfo =
+      MapEntry(resp.data["name"] ?? "", resp.data["body"] ?? "");
+  if (_latestVersionInfo.key.isNotEmpty) {
+    var latest = _latestVersionInfo.key;
+    if (latest[0].codeUnitAt(0) < '0'.codeUnitAt(0) ||
+        latest[0].codeUnitAt(0) > '9'.codeUnitAt(0)) {
+      _latestVersionInfo =
+          MapEntry(latest.substring(1), _latestVersionInfo.value);
+    }
+    return _latestVersionInfo.key != _version;
+  }
+  return false;
+}
+
 class MyVersionInfo extends StatelessWidget {
   const MyVersionInfo({Key? key}) : super(key: key);
 
@@ -39,28 +56,12 @@ class MyProjectInfo extends StatefulWidget {
 }
 
 class _MyProjectInfoState extends State<MyProjectInfo> {
-  Future checkUpdate() async {
-    var resp = await MyDio().dio.get(Global.versionUrl);
-    if (resp.statusCode != 200) return false;
-    _latestVersionInfo =
-        MapEntry(resp.data["name"] ?? "", resp.data["body"] ?? "");
-    if (_latestVersionInfo.key.isNotEmpty) {
-      var latest = _latestVersionInfo.key;
-      if (latest[0].codeUnitAt(0) < '0'.codeUnitAt(0) ||
-          latest[0].codeUnitAt(0) > '9'.codeUnitAt(0)) {
-        _latestVersionInfo =
-            MapEntry(latest.substring(1), _latestVersionInfo.value);
-      }
-      if (latest != _version) {
-        setState(() {});
-      }
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    checkUpdate();
+    checkUpdate().then((shouldUpdate) {
+      if (shouldUpdate) setState(() {});
+    });
   }
 
   @override
@@ -90,9 +91,11 @@ class _MyProjectInfoState extends State<MyProjectInfo> {
                         style: TextStyle(color: Colors.blue),
                       ),
                       onTap: () {
-                        Global.showSnackBar(context, "正在检查最新版本");
-                        checkUpdate();
-                        Global.showSnackBar(context, "检查完成");
+                        Global.showSnackBar("正在检查最新版本");
+                        checkUpdate().then((shouldUpdate) {
+                          if (shouldUpdate) setState(() {});
+                        });
+                        Global.showSnackBar("检查完成");
                       })
                 ]),
           ),

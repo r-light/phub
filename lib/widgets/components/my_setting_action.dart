@@ -70,20 +70,20 @@ class _MyGeneralSettingState extends State<MyGeneralSetting> {
         ListTile(
           title: const Text('删除缓存'),
           onTap: () async {
-            Global.showSnackBar(context, "正在清除");
+            Global.showSnackBar("正在清除");
             await DefaultCacheManager().emptyCache();
             if (!mounted) return;
-            Global.showSnackBar(context, "清除成功");
+            Global.showSnackBar("清除成功");
           },
         ),
         ListTile(
           title: const Text('删除历史记录'),
           onTap: () async {
-            Global.showSnackBar(context, "正在清除");
+            Global.showSnackBar("正在清除");
             await Provider.of<VideoLocal>(context, listen: false)
                 .removeAllHistory();
             if (!mounted) return;
-            Global.showSnackBar(context, "清除成功");
+            Global.showSnackBar("清除成功");
           },
         ),
         ListTile(
@@ -92,11 +92,11 @@ class _MyGeneralSettingState extends State<MyGeneralSetting> {
             bool? delete = await showDeleteConfirmDialog(context, "是否删除收藏");
             if (delete == null) return;
             if (!mounted) return;
-            Global.showSnackBar(context, "正在清除");
+            Global.showSnackBar("正在清除");
             await Provider.of<VideoLocal>(context, listen: false)
                 .removeAllFavorite();
             if (!mounted) return;
-            Global.showSnackBar(context, "清除成功");
+            Global.showSnackBar("清除成功");
           },
         ),
         ListTile(
@@ -110,7 +110,7 @@ class _MyGeneralSettingState extends State<MyGeneralSetting> {
             Provider.of<VideoLocal>(context, listen: false).historyLimit =
                 count;
             if (!mounted) return;
-            Global.showSnackBar(context, "设置成功");
+            Global.showSnackBar("设置成功");
           },
         ),
       ],
@@ -241,16 +241,16 @@ class _My91PornySettingState extends State<My91PornySetting> {
             String? url = await showListDialog(context, "设置域名");
             if (url == null) return;
             if (!mounted) return;
-            Global.showSnackBar(context, "测试中");
-            var res = await MyDio().getHtml(url);
-            if (!mounted) return;
-            if (res.key == 200) {
-              Global.showSnackBar(context, "测试成功");
+            setState(() {
               PornyClient().currentDomain = url;
-            } else {
-              Global.showSnackBar(context, "测试失败");
-            }
-            setState(() {});
+              MyDio().getHtml(url).then((res) {
+                if (res.key == 200) {
+                  Global.showSnackBar("$url 测试成功");
+                } else {
+                  Global.showSnackBar("$url 测试失败");
+                }
+              });
+            });
           },
         ),
       ],

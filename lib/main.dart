@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:phub/common/global.dart';
 import 'package:phub/widgets/components/my_about_me.dart';
 import 'package:phub/widgets/components/my_search_page.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const MyVideoPage(),
+      builder: EasyLoading.init(),
     );
   }
 }
