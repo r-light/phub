@@ -25,6 +25,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   ChewieController? _controller;
   Chewie? playerWidget;
   bool focus = false;
+  int circuit = 0;
 
   @override
   void initState() {
@@ -82,7 +83,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 : const Icon(
                     Icons.open_in_full,
                   ),
-          )
+          ),
         ],
       ),
       body: SafeArea(
@@ -97,39 +98,44 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   }
 
   Widget getVideoInfoWidget() {
-    return ListTile(
-      title: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(widget.content["record"].title),
-      ),
-      subtitle: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          GestureDetector(
-            child: Row(
-              children: [
-                const Icon(Icons.person),
-                Text(widget.content["record"].author)
-              ],
-            ),
-            onTap: () {
-              _controller?.pause();
-              Navigator.of(context)
-                  .pushNamed(MySources.searchResult, arguments: {
-                "keywords": widget.content["record"].author,
-                "searchFunc": widget.content["searchFunc"],
-                "videoFunc": widget.content["videoFunc"],
-                "relatedFunc": widget.content["relatedFunc"],
-                "authorFunc": widget.content["authorFunc"],
-                "index": Porny91Options.author.index,
-              });
-            },
+    return Column(
+      children: [
+        getCircuit(),
+        ListTile(
+          title: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(widget.content["record"].title),
           ),
-          Text(widget.content["record"].pageView +
-              " | " +
-              widget.content["record"].updateDate),
-        ],
-      ),
+          subtitle: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                child: Row(
+                  children: [
+                    const Icon(Icons.person),
+                    Text(widget.content["record"].author)
+                  ],
+                ),
+                onTap: () {
+                  _controller?.pause();
+                  Navigator.of(context)
+                      .pushNamed(MySources.searchResult, arguments: {
+                    "keywords": widget.content["record"].author,
+                    "searchFunc": widget.content["searchFunc"],
+                    "videoFunc": widget.content["videoFunc"],
+                    "relatedFunc": widget.content["relatedFunc"],
+                    "authorFunc": widget.content["authorFunc"],
+                    "index": Porny91Options.author.index,
+                  });
+                },
+              ),
+              Text(widget.content["record"].pageView +
+                  " | " +
+                  widget.content["record"].updateDate),
+            ],
+          ),
+        )
+      ],
     );
   }
 
@@ -233,5 +239,90 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
             },
           );
         }));
+  }
+
+  Widget getCircuit() {
+    return Wrap(
+      spacing: 2.0,
+      children: <Widget>[
+        OutlinedButton(
+          onPressed: () {
+            if (circuit == 0) return;
+            setState(() {
+              circuit = 0;
+              _videoPlayerController?.dispose();
+              _controller?.dispose();
+              _videoPlayerController = null;
+              videoUrl = widget
+                  .content["videoFunc"](widget.content["record"].videoUrl);
+            });
+          },
+          style: circuit == 0
+              ? OutlinedButton.styleFrom(
+                  side:
+                      BorderSide(color: Theme.of(context).colorScheme.primary),
+                )
+              : null,
+          child: const Text('默认'),
+        ),
+        OutlinedButton(
+            onPressed: () {
+              if (circuit == 1) return;
+              setState(() {
+                circuit = 1;
+                _videoPlayerController?.dispose();
+                _controller?.dispose();
+                _videoPlayerController = null;
+                videoUrl = widget.content["videoFunc"](
+                    widget.content["record"].videoUrl + "?server=line1");
+              });
+            },
+            style: circuit == 1
+                ? OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                  )
+                : null,
+            child: const Text('线路1')),
+        OutlinedButton(
+            onPressed: () {
+              if (circuit == 2) return;
+              setState(() {
+                circuit = 2;
+                _videoPlayerController?.dispose();
+                _controller?.dispose();
+                _videoPlayerController = null;
+                videoUrl = widget.content["videoFunc"](
+                    widget.content["record"].videoUrl + "?server=line2");
+              });
+            },
+            style: circuit == 2
+                ? OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                  )
+                : null,
+            child: const Text('线路2')),
+        OutlinedButton(
+            onPressed: () {
+              if (circuit == 3) return;
+              setState(() {
+                circuit = 3;
+                _videoPlayerController?.dispose();
+                _controller?.dispose();
+                _videoPlayerController = null;
+                videoUrl = widget.content["videoFunc"](
+                    widget.content["record"].videoUrl + "?server=line3");
+              });
+            },
+            style: circuit == 3
+                ? OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                  )
+                : null,
+            child: const Text('线路3')),
+      ],
+    );
   }
 }
