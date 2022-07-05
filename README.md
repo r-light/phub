@@ -23,7 +23,7 @@
 - [shared_preferences](https://pub.dev/packages/shared_preferences)
 - [json_serializable](https://pub.dev/packages/json_serializable)
 - [dio](https://pub.dev/packages/dio)
-- [flutter_easyloading]([flutter_easyloading](https://pub.dev/packages/flutter_easyloading))
+- [flutter_easyloading](https://pub.dev/packages/flutter_easyloading)
 
 - [How to change Android minSdkVersion in flutter project](https://stackoverflow.com/questions/52060516/how-to-change-android-minsdkversion-in-flutter-project)
 - [Flutter build Runtime JAR files in the classpath should have the same version](https://stackoverflow.com/questions/71347054/flutter-build-runtime-jar-files-in-the-classpath-should-have-the-same-version-t)
