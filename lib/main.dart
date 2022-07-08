@@ -7,7 +7,8 @@ import 'package:phub/widgets/components/my_search_result.dart';
 import 'package:phub/widgets/components/my_setting_action.dart';
 import 'package:phub/widgets/components/my_version.dart';
 import 'package:phub/widgets/components/my_video_player.dart';
-import 'package:phub/widgets/my_porny91.dart';
+import 'package:phub/widgets/my_missav_page.dart';
+import 'package:phub/widgets/my_porny91_page.dart';
 import 'package:phub/widgets/my_video_page.dart';
 import 'package:provider/provider.dart';
 
@@ -46,12 +47,15 @@ class MyApp extends StatelessWidget {
               MyVideoSearchPage(content: settings.arguments),
           MySources.searchResult: (ctx) =>
               MySearchResult(content: settings.arguments),
+          MySources.missAvActress: (ctx) =>
+              MyMissAvActress(content: settings.arguments)
         };
         WidgetBuilder builder = routes[settings.name]!;
         return MaterialPageRoute(builder: (ctx) => builder(ctx));
       },
       routes: {
         MySources.porny91: (context) => const MyPorny91(),
+        MySources.missav: (context) => const MyMissAv(),
         MySources.settings: (context) => const MySetting(),
         MySources.aboutMe: (context) => const MyAboutMe(),
       },

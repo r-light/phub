@@ -63,21 +63,27 @@ class Global {
         : EasyLoading.showToast(text,
             toastPosition: EasyLoadingToastPosition.bottom, duration: duration);
   }
+
+  static String trimAllLF(String s) {
+    return s.replaceAll('\n', " ").trim();
+  }
 }
 
 class MySources {
-  static final Map<String, String> sourceUrl = {};
   static const Map<String, String> sourceName = {
     porny91: porny91,
+    missav: missav,
   };
 
   static const porny91 = "91porny";
+  static const missav = "MISSAV";
 
   static const settings = "setting";
   static const videoPlayer = "videoPlayer";
   static const searchPage = "MyVideoSearchPage";
   static const searchResult = "MyVideoSearchResult";
   static const aboutMe = "MyAboutMe";
+  static const missAvActress = "missAvActress";
 }
 
 class VideoLocal with ChangeNotifier {
@@ -257,12 +263,16 @@ class MyDio {
 class Configs with ChangeNotifier {
   late bool _listViewInPorny91;
   late bool _listViewInSearchResult;
+  late bool _listViewInMissAv;
+  late bool _showFooterInGridView;
   double _listViewItemHeight = 110;
 
   Future init() async {
     var pref = await SharedPreferences.getInstance();
     _listViewInPorny91 = pref.getBool("listViewInPorny91") ?? true;
     _listViewInSearchResult = pref.getBool("listViewInSearchResult") ?? true;
+    _listViewInMissAv = pref.getBool("listViewInMissAv") ?? true;
+    _showFooterInGridView = pref.getBool("showFooterInGridView") ?? true;
     return this;
   }
 
@@ -289,7 +299,25 @@ class Configs with ChangeNotifier {
   set listViewItemHeight(double value) {
     _listViewItemHeight = value;
     notifyListeners();
-    SharedPreferences.getInstance().then((pref) =>
-        pref.setDouble("listViewItemHeight", _listViewItemHeight));
+    SharedPreferences.getInstance().then(
+        (pref) => pref.setDouble("listViewItemHeight", _listViewItemHeight));
+  }
+
+  bool get listViewInMissAv => _listViewInMissAv;
+
+  set listViewInMissAv(bool value) {
+    _listViewInMissAv = value;
+    notifyListeners();
+    SharedPreferences.getInstance()
+        .then((pref) => pref.setBool("listViewInMissAv", _listViewInMissAv));
+  }
+
+  bool get showFooterInGridView => _showFooterInGridView;
+
+  set showFooterInGridView(bool value) {
+    _showFooterInGridView = value;
+    notifyListeners();
+    SharedPreferences.getInstance().then(
+        (pref) => pref.setBool("showFooterInGridView", _showFooterInGridView));
   }
 }

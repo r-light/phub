@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
+import 'package:phub/videos/my_video_interface.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_status.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+/* 
+ "client": client,
+ "record": record,
+ */
 class MyVideoPlayer extends StatefulWidget {
   final dynamic content;
 
@@ -19,20 +24,19 @@ class MyVideoPlayer extends StatefulWidget {
 }
 
 class _MyVideoPlayerState extends State<MyVideoPlayer> {
-  late Future<String> videoUrl;
-  late Future<List<VideoSimple>> videos;
+  late Future<Map<String, dynamic>> videoInfo;
+  late List<VideoSimple> videos;
   VideoPlayerController? _videoPlayerController;
   ChewieController? _controller;
   Chewie? playerWidget;
   bool focus = false;
   int circuit = 0;
+  late MyVideo client = widget.content["client"];
 
   @override
   void initState() {
     super.initState();
-
-    videoUrl = widget.content["videoFunc"](widget.content["record"].videoUrl);
-    videos = widget.content["relatedFunc"](widget.content["record"].videoUrl);
+    videoInfo = client.parseFromVideoUrl(widget.content["record"].videoUrl);
   }
 
   @override
@@ -88,8 +92,11 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
       ),
       body: SafeArea(
         child: Column(children: [
+          const SizedBox(
+            height: 5,
+          ),
           Expanded(child: getVideoWidget()),
-          getVideoInfoWidget(),
+          getVideoInfoWidget(context),
           focus ? Container() : const Divider(),
           focus ? Container() : Expanded(flex: 2, child: getRelatedWidget())
         ]),
@@ -97,51 +104,103 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     );
   }
 
-  Widget getVideoInfoWidget() {
-    return Column(
-      children: [
-        getCircuit(),
-        ListTile(
-          title: Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Text(widget.content["record"].title),
-          ),
-          subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                child: Row(
-                  children: [
-                    const Icon(Icons.person),
-                    Text(widget.content["record"].author)
-                  ],
+  Widget getVideoInfoWidget(BuildContext context) {
+    if (widget.content["record"].source == MySources.missav) {
+      return FutureBuilder<Map<String, dynamic>>(
+          future: videoInfo,
+          builder: (context, snapshot) {
+            List<String> authors = snapshot.hasData
+                ? (snapshot.requireData["author"] ??
+                    [snapshot.requireData["id"]])
+                : [widget.content["record"].author];
+            return Column(
+              children: [
+                ListTile(
+                    title: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(
+                        widget.content["record"].title,
+                        maxLines: 3,
+                      ),
+                    ),
+                    subtitle: Wrap(
+                      children: [
+                        const Icon(Icons.person),
+                        ...authors
+                            .asMap()
+                            .map((index, e) {
+                              return MapEntry(
+                                  index,
+                                  GestureDetector(
+                                    child: Text("$e "),
+                                    onTap: () {
+                                      if (!snapshot.hasData) return;
+                                      var urls =
+                                          snapshot.requireData["authorUrl"];
+                                      if (urls == null || urls.isEmpty) {
+                                        return;
+                                      }
+                                      _controller?.pause();
+                                      Navigator.of(context).pushNamed(
+                                          MySources.missAvActress,
+                                          arguments: {
+                                            "url": urls[index],
+                                            "name": e,
+                                          });
+                                    },
+                                  ));
+                            })
+                            .values
+                            .toList(),
+                      ],
+                    ))
+              ],
+            );
+          });
+    } else {
+      return Column(
+        children: [
+          getCircuit(context),
+          ListTile(
+            title: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(widget.content["record"].title),
+            ),
+            subtitle: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person),
+                      Text(widget.content["record"].author)
+                    ],
+                  ),
+                  onTap: () {
+                    _controller?.pause();
+                    Navigator.of(context)
+                        .pushNamed(MySources.searchResult, arguments: {
+                      "client": widget.content["client"],
+                      "source": widget.content["source"],
+                      "keywords": widget.content["record"].author,
+                      "index": Porny91Options.author.index,
+                    });
+                  },
                 ),
-                onTap: () {
-                  _controller?.pause();
-                  Navigator.of(context)
-                      .pushNamed(MySources.searchResult, arguments: {
-                    "keywords": widget.content["record"].author,
-                    "searchFunc": widget.content["searchFunc"],
-                    "videoFunc": widget.content["videoFunc"],
-                    "relatedFunc": widget.content["relatedFunc"],
-                    "authorFunc": widget.content["authorFunc"],
-                    "index": Porny91Options.author.index,
-                  });
-                },
-              ),
-              Text(widget.content["record"].pageView +
-                  " | " +
-                  widget.content["record"].updateDate),
-            ],
-          ),
-        )
-      ],
-    );
+                Text(widget.content["record"].pageView +
+                    " | " +
+                    widget.content["record"].updateDate),
+              ],
+            ),
+          )
+        ],
+      );
+    }
   }
 
   Widget getVideoWidget() {
-    return FutureBuilder<String>(
-        future: videoUrl,
+    return FutureBuilder<Map<String, dynamic>>(
+        future: videoInfo,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
@@ -151,11 +210,15 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
           if (!snapshot.hasData) {
             return const MyWaiting();
           }
-          var m3u8 = snapshot.requireData;
+          var m3u8 = snapshot.requireData["videoUrl"] as String;
+          VideoSimple record = widget.content["record"];
           if (_videoPlayerController == null) {
-            _videoPlayerController = VideoPlayerController.network(
-              m3u8,
-            );
+            if (record.source == MySources.missav) {
+              _videoPlayerController = VideoPlayerController.network(m3u8,
+                  httpHeaders: {"referer": "https://missav.com/"});
+            } else {
+              _videoPlayerController = VideoPlayerController.network(m3u8);
+            }
             _videoPlayerController!.initialize().whenComplete(() {
               setState(() {
                 _controller = ChewieController(
@@ -196,8 +259,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
   }
 
   Widget getRelatedWidget() {
-    return FutureBuilder<List<VideoSimple>>(
-        future: videos,
+    return FutureBuilder<Map<String, dynamic>>(
+        future: videoInfo,
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
             return const Center(
@@ -207,12 +270,16 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
           if (!snapshot.hasData) {
             return const MyWaiting();
           }
-          var records = snapshot.requireData;
+          List<VideoSimple> records = snapshot.requireData["related"];
+          var childAspectRatio =
+              (records.isNotEmpty && records.first.source == MySources.missav)
+                  ? 3 / 2
+                  : 1.0;
           return GridView.builder(
             padding: const EdgeInsets.all(5.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 1.0,
+              childAspectRatio: childAspectRatio,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
             ),
@@ -221,19 +288,22 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               VideoSimple record = records[index];
               return MyGridGestureDetector(
                 record: record,
-                videoFunc: widget.content["videoFunc"],
-                relatedFunc: widget.content["relatedFunc"],
-                authorFunc: widget.content["authorFunc"],
-                searchFunc: widget.content["searchFunc"],
+                client: widget.content["client"],
                 controller: _controller,
                 child: VideoSimpleItem(
                   thumb: record.thumb,
                   title: record.title,
-                  author: record.author,
-                  updateTime: record.updateDate,
+                  author:
+                      record.source == MySources.missav ? null : record.author,
+                  updateTime: record.source == MySources.missav
+                      ? null
+                      : record.updateDate,
                   source: record.sourceName ?? "unknown",
                   isList: false,
-                  pageView: record.pageView,
+                  pageView: record.source == MySources.missav
+                      ? null
+                      : record.pageView,
+                  tags: record.tags,
                 ),
               );
             },
@@ -241,7 +311,10 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
         }));
   }
 
-  Widget getCircuit() {
+  Widget getCircuit(BuildContext context) {
+    if (widget.content["record"].source != MySources.porny91) {
+      return Container();
+    }
     return Wrap(
       spacing: 2.0,
       children: <Widget>[
@@ -253,8 +326,9 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
               _videoPlayerController?.dispose();
               _controller?.dispose();
               _videoPlayerController = null;
-              videoUrl = widget
-                  .content["videoFunc"](widget.content["record"].videoUrl);
+              _controller = null;
+              videoInfo =
+                  client.parseFromVideoUrl(widget.content["record"].videoUrl);
             });
           },
           style: circuit == 0
@@ -273,7 +347,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 _videoPlayerController?.dispose();
                 _controller?.dispose();
                 _videoPlayerController = null;
-                videoUrl = widget.content["videoFunc"](
+                _controller = null;
+                videoInfo = client.parseFromVideoUrl(
                     widget.content["record"].videoUrl + "?server=line1");
               });
             },
@@ -292,7 +367,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 _videoPlayerController?.dispose();
                 _controller?.dispose();
                 _videoPlayerController = null;
-                videoUrl = widget.content["videoFunc"](
+                _controller = null;
+                videoInfo = client.parseFromVideoUrl(
                     widget.content["record"].videoUrl + "?server=line2");
               });
             },
@@ -311,7 +387,8 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                 _videoPlayerController?.dispose();
                 _controller?.dispose();
                 _videoPlayerController = null;
-                videoUrl = widget.content["videoFunc"](
+                _controller = null;
+                videoInfo = client.parseFromVideoUrl(
                     widget.content["record"].videoUrl + "?server=line3");
               });
             },

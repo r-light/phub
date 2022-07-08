@@ -21,7 +21,7 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
       MediaQuery.of(context).platformBrightness == Brightness.dark
           ? null
           : BoxDecoration(color: Theme.of(context).colorScheme.primary);
-  Porny91Options? _pornyOp = Porny91Options.author;
+  late Porny91Options _pornyOp = Porny91Options.author;
 
   @override
   void initState() {
@@ -79,11 +79,9 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
                 Navigator.of(context)
                     .pushNamed(MySources.searchResult, arguments: {
                   "keywords": _searchContext,
-                  "searchFunc": widget.content["searchFunc"],
-                  "index": _pornyOp?.index ?? 0,
-                  "videoFunc": widget.content["videoFunc"],
-                  "relatedFunc": widget.content["relatedFunc"],
-                  "authorFunc": widget.content["authorFunc"],
+                  "client": widget.content["client"],
+                  "index": _pornyOp.index,
+                  "source": widget.content["source"],
                 });
               },
             ),
@@ -106,17 +104,17 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
                   Navigator.of(context)
                       .pushNamed(MySources.searchResult, arguments: {
                     "keywords": _searchContext,
-                    "searchFunc": widget.content["searchFunc"],
-                    "index": _pornyOp?.index ?? 0,
-                    "videoFunc": widget.content["videoFunc"],
-                    "relatedFunc": widget.content["relatedFunc"],
-                    "authorFunc": widget.content["authorFunc"],
+                    "client": widget.content["client"],
+                    "index": _pornyOp.index,
+                    "source": widget.content["source"],
                   });
                 },
               ),
             ),
           ),
-          getDropDownWidget(),
+          widget.content["source"] == MySources.porny91
+              ? getDropDownWidget()
+              : Container(),
         ],
       ),
     );
@@ -132,6 +130,7 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
             value: Porny91Options.latest,
             groupValue: _pornyOp,
             onChanged: (Porny91Options? value) {
+              if (value == null) return;
               setState(() {
                 _pornyOp = value;
               });
@@ -142,6 +141,7 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
             value: Porny91Options.hottest,
             groupValue: _pornyOp,
             onChanged: (Porny91Options? value) {
+              if (value == null) return;
               setState(() {
                 _pornyOp = value;
               });
@@ -152,6 +152,7 @@ class MyVideoSearchPageState extends State<MyVideoSearchPage> {
             value: Porny91Options.author,
             groupValue: _pornyOp,
             onChanged: (Porny91Options? value) {
+              if (value == null) return;
               setState(() {
                 _pornyOp = value;
               });

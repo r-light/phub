@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
+import 'package:phub/videos/my_video_interface.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_setting_action.dart';
 import 'package:phub/widgets/components/my_status.dart';
@@ -9,9 +10,10 @@ import 'package:phub/widgets/components/my_video_card.dart';
 import 'package:provider/provider.dart';
 
 /* 
-"keywords": _searchContext,
-"searchFunc": widget.content["searchFunc"],
-"index": _pornyOp?.index ?? 0 
+  "keywords": _searchContext,
+  "client": widget.content["client"],
+  "index": _pornyOp.index,
+  "source": widget.content["source"], 
 */
 
 class MySearchResult extends StatefulWidget {
@@ -29,6 +31,7 @@ class _MySearchResultState extends State<MySearchResult> {
   int currentPage = 1;
   int totalNum = 0;
   List<VideoSimple> videos = [];
+  late MyVideo client = widget.content["client"];
 
   void changeView(BuildContext context) {
     Provider.of<Configs>(context, listen: false).listViewInSearchResult =
@@ -78,20 +81,22 @@ class _MySearchResultState extends State<MySearchResult> {
 
   void loadCurrentPage() async {
     isLoading = true;
-    widget.content["searchFunc"](widget.content["keywords"],
-            index: widget.content["index"]!, page: currentPage)
-        .then((entry) {
-      setState(() {
-        maxPage = max(entry.key, maxPage);
-        videos.addAll(entry.value);
-        totalNum = max(totalNum, entry.value.length * maxPage);
-        currentPage++;
-        isLoading = false;
-        if (currentPage > maxPage) {
-          hasMore = false;
-          totalNum = videos.length;
-        }
-      });
+    // TODO
+    var entry = widget.content["source"] == MySources.porny91
+        ? (await client.parseFromSearch(widget.content["keywords"],
+            index: widget.content["index"]!, page: currentPage))
+        : (await client.parseFromSearch(widget.content["keywords"],
+            page: currentPage));
+    setState(() {
+      maxPage = max(entry.key, maxPage);
+      videos.addAll(entry.value);
+      totalNum = max(totalNum, entry.value.length * maxPage);
+      currentPage++;
+      isLoading = false;
+      if (currentPage > maxPage) {
+        hasMore = false;
+        totalNum = videos.length;
+      }
     });
   }
 
@@ -114,20 +119,23 @@ class _MySearchResultState extends State<MySearchResult> {
           var record = videos[index];
           return MyGridGestureDetector(
             record: record,
-            videoFunc: widget.content["videoFunc"],
-            relatedFunc: widget.content["relatedFunc"],
-            authorFunc: widget.content["authorFunc"],
-            searchFunc: widget.content["searchFunc"],
+            client: widget.content["client"],
             child: SizedBox(
                 height: height,
                 child: VideoSimpleItem(
                   thumb: record.thumb,
                   title: record.title,
-                  author: record.author,
-                  updateTime: record.updateDate,
-                  source: record.sourceName!,
+                  author:
+                      record.source == MySources.missav ? null : record.author,
+                  updateTime: record.source == MySources.missav
+                      ? null
+                      : record.updateDate,
+                  source: record.sourceName ?? "unknown",
                   isList: true,
-                  pageView: record.pageView,
+                  pageView: record.source == MySources.missav
+                      ? null
+                      : record.pageView,
+                  tags: record.tags,
                 )),
           );
         },
@@ -156,18 +164,18 @@ class _MySearchResultState extends State<MySearchResult> {
           VideoSimple record = videos[index];
           return MyGridGestureDetector(
             record: record,
-            videoFunc: widget.content["videoFunc"],
-            relatedFunc: widget.content["relatedFunc"],
-            authorFunc: widget.content["authorFunc"],
-            searchFunc: widget.content["searchFunc"],
+            client: widget.content["client"],
             child: VideoSimpleItem(
               thumb: record.thumb,
               title: record.title,
-              author: record.author,
-              updateTime: record.updateDate,
-              source: record.sourceName!,
+              author: record.source == MySources.missav ? null : record.author,
+              updateTime:
+                  record.source == MySources.missav ? null : record.updateDate,
+              source: record.sourceName ?? "unknown",
               isList: false,
-              pageView: record.pageView,
+              pageView:
+                  record.source == MySources.missav ? null : record.pageView,
+              tags: record.tags,
             ),
           );
         },

@@ -55,7 +55,7 @@ class MyDrawer extends StatelessWidget {
               Icons.eighteen_up_rating,
             ),
             title: Text(name),
-            onTap: () => Navigator.pushNamed(context, MySources.porny91),
+            onTap: () => Navigator.pushNamed(context, name),
           ),
         )
         .toList();

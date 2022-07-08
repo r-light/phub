@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
+import 'package:phub/videos/my_video_interface.dart';
 import 'package:provider/provider.dart';
 
 class MyGridGestureDetector extends StatelessWidget {
@@ -8,19 +9,13 @@ class MyGridGestureDetector extends StatelessWidget {
       {Key? key,
       required this.child,
       required this.record,
-      required this.relatedFunc,
-      required this.videoFunc,
-      required this.authorFunc,
-      required this.searchFunc,
+      required this.client,
       this.controller})
       : super(key: key);
 
   final Widget? child;
   final VideoSimple record;
-  final dynamic relatedFunc;
-  final dynamic videoFunc;
-  final dynamic authorFunc;
-  final dynamic searchFunc;
+  final MyVideo client;
   final dynamic controller;
 
   @override
@@ -34,11 +29,8 @@ class MyGridGestureDetector extends StatelessWidget {
             .whenComplete(() => Provider.of<VideoLocal>(context, listen: false)
                 .removeHistory());
         Navigator.pushNamed(context, MySources.videoPlayer, arguments: {
-          "relatedFunc": relatedFunc,
-          "videoFunc": videoFunc,
-          "authorFunc": authorFunc,
+          "client": client,
           "record": record,
-          "searchFunc": searchFunc,
         });
       },
       child: child,

@@ -1,26 +1,30 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:phub/common/global.dart';
+import 'package:provider/provider.dart';
 
 class VideoSimpleItem extends StatelessWidget {
   const VideoSimpleItem({
     Key? key,
     required this.thumb,
     required this.title,
-    required this.author,
+    this.author,
     required this.source,
-    required this.updateTime,
+    this.updateTime,
     required this.isList,
-    required this.pageView,
+    this.pageView,
+    this.tags,
   }) : super(key: key);
 
   static final Color lightColor = Colors.grey.shade700;
   final String thumb;
   final String title;
-  final String author;
+  final String? author;
   final String source;
-  final String updateTime;
+  final String? updateTime;
   final bool isList;
-  final String pageView;
+  final String? pageView;
+  final List<String>? tags;
   static const double fontSize = 12;
 
   Widget listItem() {
@@ -57,15 +61,27 @@ class VideoSimpleItem extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: fontSize,
                     ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    author,
+                    author ?? "",
                     style: TextStyle(fontSize: fontSize, color: lightColor),
+                    maxLines: 1,
                   ),
                   Text(
-                    pageView,
+                    pageView ?? "",
                     style: TextStyle(fontSize: fontSize, color: lightColor),
+                    maxLines: 1,
                   ),
+                  (tags != null && tags!.isNotEmpty)
+                      ? Text(
+                          tags?.join(" ") ?? "",
+                          style:
+                              TextStyle(fontSize: fontSize, color: lightColor),
+                          maxLines: 1,
+                        )
+                      : Container(),
                 ],
               ),
             )),
@@ -83,7 +99,7 @@ class VideoSimpleItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  updateTime,
+                  updateTime ?? "",
                   style: TextStyle(
                     color: lightColor,
                     fontSize: fontSize,
@@ -95,32 +111,49 @@ class VideoSimpleItem extends StatelessWidget {
     );
   }
 
-  Widget gridItem() {
+  Widget gridItem(BuildContext context) {
     return GridTile(
-      footer: Container(
-        color: Colors.white70,
-        child: Column(children: [
-          Text(
-            title,
-            style: const TextStyle(color: Colors.black, fontSize: fontSize),
-            textAlign: TextAlign.left,
-            maxLines: 1,
-            // overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            author,
-            style: TextStyle(color: Colors.grey[800], fontSize: fontSize),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-          ),
-          Text(
-            "$updateTime | $pageView",
-            style: TextStyle(color: Colors.grey[800], fontSize: fontSize),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-          ),
-        ]),
-      ),
+      footer: context.select((Configs config) => config.showFooterInGridView)
+          ? Container(
+              color: Colors.white70,
+              child: Column(children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(color: Colors.black, fontSize: fontSize),
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  // overflow: TextOverflow.ellipsis,
+                ),
+                author != null
+                    ? Text(
+                        author!,
+                        style: TextStyle(
+                            color: Colors.grey[800], fontSize: fontSize),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                      )
+                    : Container(),
+                (updateTime != null && pageView != null)
+                    ? Text(
+                        "$updateTime | $pageView",
+                        style: TextStyle(
+                            color: Colors.grey[800], fontSize: fontSize),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                      )
+                    : Container(),
+                (tags != null && tags!.isNotEmpty)
+                    ? Text(
+                        tags!.join(" "),
+                        style: TextStyle(
+                            fontSize: fontSize, color: Colors.grey[800]),
+                        maxLines: 1,
+                      )
+                    : Container(),
+              ]),
+            )
+          : Container(),
       child: CachedNetworkImage(
         imageUrl: thumb,
         fit: BoxFit.cover,
@@ -132,6 +165,6 @@ class VideoSimpleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isList ? listItem() : gridItem();
+    return isList ? listItem() : gridItem(context);
   }
 }

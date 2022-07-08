@@ -8,4 +8,9 @@ abstract class MyVideo {
       {int index = 1});
   Future<MapEntry<int, List<VideoSimple>>> parseFromSearch(String keywords,
       {int index = 0, int page = 1});
+  Future<Map<String, dynamic>> parseFromVideoUrl(
+    String url,
+  );
+  Future<MapEntry<int, List<VideoSimple>>> parseFromAuthor(String author,
+      {int index = 1});
 }

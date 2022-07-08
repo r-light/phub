@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:phub/common/global.dart';
-import 'package:phub/widgets/my_porny91.dart';
+import 'package:phub/videos/my_porny91.dart';
 import 'package:provider/provider.dart';
 
 List<Widget> alwaysInActions() {
@@ -113,6 +113,13 @@ class _MyGeneralSettingState extends State<MyGeneralSetting> {
             Global.showSnackBar("设置成功");
           },
         ),
+        ListTile(
+          minVerticalPadding: 4,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [const Text("网格模式显示标题"), showFooter()],
+          ),
+        ),
       ],
     );
   }
@@ -160,63 +167,35 @@ class _MyGeneralSettingState extends State<MyGeneralSetting> {
       },
     );
   }
-  // /// 获取缓存
-  // Future<double> loadApplicationCache() async {
-  //   /// 获取文件夹
-  //   Directory directory = await getTemporaryDirectory();
 
-  //   /// 获取缓存大小
-  //   double value = await getTotalSizeOfFilesInDir(directory);
-  //   return value;
-  // }
-
-  // /// 循环计算文件的大小（递归）
-  // Future<double> getTotalSizeOfFilesInDir(final FileSystemEntity file) async {
-  //   if (!file.existsSync()) return 0;
-  //   if (file is File) {
-  //     int length = await file.length();
-  //     return double.parse(length.toString());
-  //   } else if (file is Directory) {
-  //     final List<FileSystemEntity> children = file.listSync();
-  //     double total = 0;
-  //     for (final FileSystemEntity child in children) {
-  //       total += await getTotalSizeOfFilesInDir(child);
-  //     }
-  //     return total;
-  //   }
-  //   return 0;
-  // }
-
-  // /// 缓存大小格式转换
-  // String formatSize(double value) {
-  //   List<String> unitArr = ['B', 'K', 'M', 'G'];
-  //   int index = 0;
-  //   while (value > 1024) {
-  //     index++;
-  //     value = value / 1024;
-  //   }
-  //   String size = value.toStringAsFixed(2);
-  //   return size + unitArr[index];
-  // }
-
-  // /// 删除缓存
-  // Future clearApplicationCache() async {
-  //   Directory directory = await getTemporaryDirectory();
-  //   //删除缓存目录
-  //   await deleteDirectory(directory);
-  // }
-
-  // /// 递归方式删除目录
-  // Future deleteDirectory(FileSystemEntity file) async {
-  //   if (!file.existsSync()) return;
-  //   if (file is Directory) {
-  //     final List<FileSystemEntity> children = file.listSync();
-  //     for (final FileSystemEntity child in children) {
-  //       await deleteDirectory(child);
-  //     }
-  //   }
-  //   await file.delete();
-  // }
+  Widget showFooter() {
+    return DropdownButton<bool>(
+      underline: const SizedBox(),
+      // Initial Value
+      value: context.select((Configs config) => config.showFooterInGridView),
+      // Down Arrow Icon
+      icon: const Icon(Icons.keyboard_arrow_down),
+      // Array list of items
+      items: const [
+        DropdownMenuItem(
+          value: true,
+          child: Text("是"),
+        ),
+        DropdownMenuItem(
+          value: false,
+          child: Text("否"),
+        )
+      ],
+      // After selecting the desired option,it will
+      // change button value to selected value
+      onChanged: (bool? value) {
+        if (value != null) {
+          Provider.of<Configs>(context, listen: false).showFooterInGridView =
+              value;
+        }
+      },
+    );
+  }
 }
 
 class My91PornySetting extends StatefulWidget {

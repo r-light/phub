@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:phub/common/dto.dart';
 import 'package:phub/common/global.dart';
+import 'package:phub/videos/api.dart';
 import 'package:phub/widgets/components/my_drawer.dart';
 import 'package:phub/widgets/components/my_gesture_detector.dart';
 import 'package:phub/widgets/components/my_version.dart';
 import 'package:phub/widgets/components/my_video_card.dart';
-import 'package:phub/widgets/my_porny91.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
@@ -133,18 +133,15 @@ class MyVideoLayoutState extends State<MyVideoLayout>
               VideoSimple record = records[index];
               return MyGridGestureDetector(
                 record: record,
-                videoFunc: PornyClient().parseVideo,
-                relatedFunc: PornyClient().parseRelated,
-                authorFunc: PornyClient().parseFromAuthor,
-                searchFunc: PornyClient().parseFromSearch,
+                client: videoMethod[record.source]!,
                 child: VideoSimpleItem(
                   thumb: record.thumb,
                   title: record.title,
-                  author: record.author,
-                  updateTime: record.updateDate,
                   source: record.sourceName ?? "unknown",
                   isList: false,
-                  pageView: record.pageView,
+                  pageView: record.source == MySources.missav
+                      ? null
+                      : record.pageView,
                 ),
               );
             },
@@ -169,18 +166,15 @@ class MyVideoLayoutState extends State<MyVideoLayout>
               return MyGridGestureDetector(
                 key: ValueKey(Global.videoSimpleKey(record)),
                 record: record,
-                videoFunc: PornyClient().parseVideo,
-                relatedFunc: PornyClient().parseRelated,
-                authorFunc: PornyClient().parseFromAuthor,
-                searchFunc: PornyClient().parseFromSearch,
+                client: videoMethod[record.source]!,
                 child: VideoSimpleItem(
                   thumb: record.thumb,
                   title: record.title,
-                  author: record.author,
-                  updateTime: record.updateDate,
                   source: record.sourceName ?? "unknown",
                   isList: false,
-                  pageView: record.pageView,
+                  pageView: record.source == MySources.missav
+                      ? null
+                      : record.pageView,
                 ),
               );
             },
